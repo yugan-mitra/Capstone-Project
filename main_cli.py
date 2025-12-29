@@ -1,12 +1,12 @@
 import asyncio
-import datetime
-import os
+import aiohttp
 from functools import reduce
 
 # Import our custom modules
 from src.database.csv_db import CsvExpenseRepository
 from src.services.api_client import ApiClient
 from src.analytics.charts import ExpenseVisualizer
+from src.services.location_service import LocationService
 
 # --- Helper Function for Analysis ---
 def print_summary(expenses):
@@ -29,20 +29,27 @@ def print_summary(expenses):
 
 # --- Main Async Function ---
 async def main():
-    # 1. Initialize Components (OOP)
+    # 1. Initialize Components
     db = CsvExpenseRepository('data/expenses.csv')
     api = ApiClient()
     viz = ExpenseVisualizer('data/expenses.csv')
+    loc_service = LocationService()
 
     print("\n" + "="*50)
     print("🚀 PRODUCTIVITY DASHBOARD LOADING...")
     print("="*50)
 
-    # 2. Fetch Live Data (Asynchronous)
-    print("⏳ Fetching daily briefing (Weather & Quotes)...")
+    # 2. Detect Location First (Async)
+    print("📡 Detecting Location...")
+    async with aiohttp.ClientSession() as session:
+        current_city = await loc_service.detect_location(session)
+    print(f"📍 Location found: {current_city}")
+
+    # 3. Fetch Data based on location
+    print("⏳ Fetching daily briefing...")
     try:
-        # This runs in parallel!
-        weather, quote = await api.get_daily_data()
+        # Pass the detected city to the API
+        weather, quote = await api.get_daily_data(current_city)
         
         print(f"\n🌞 Weather: {weather}")
         print(f"💡 Quote:   {quote}")
@@ -51,43 +58,39 @@ async def main():
 
     print("-" * 50)
 
-    # 3. Interactive Loop
+    # 4. Interactive Loop
     while True:
         print("\nMain Menu:")
         print("1. ➕ Add Expense")
-        print("2. 📊 View Analytics (Charts)")
-        print("3. 📋 View Summary (Data)")
+        print("2. 📊 View Analytics")
+        print("3. 🌍 Change Location (Manual)")
         print("4. 🚪 Exit")
         
         choice = input("Select an option (1-4): ")
 
         if choice == '1':
-            cat = input("Enter Category (Food/Transport/Bills): ")
-            try:
-                amt = float(input("Enter Amount: "))
-                date = datetime.date.today().isoformat()
-                
-                # Save using OOP Interface
-                db.add_expense(cat, amt, date)
-                print("✅ Expense Saved!")
-            except ValueError:
-                print("❌ Invalid amount.")
+            pass 
 
         elif choice == '2':
-            print("generating charts...")
-            viz.plot_category_distribution()
-            viz.plot_daily_trend()
+            pass
 
         elif choice == '3':
-            # Get data from DB and analyze
-            data = db.get_all_expenses()
-            print_summary(data)
+            # Manual Location Logic
+            new_city = input("Enter your city name: ")
+            loc_service.set_manual_location(new_city)
+            
+            # Refresh Weather
+            print("🔄 Updating Weather...")
+            try:
+                # We need a quick async call here
+                weather, _ = await api.get_daily_data(loc_service.city)
+                print(f"✅ Updated: {weather}")
+            except Exception as e:
+                print("❌ Could not find city.")
 
         elif choice == '4':
-            print("👋 Goodbye! Stay Productive.")
+            print("👋 Goodbye!")
             break
-        else:
-            print("❌ Invalid choice.")
 
 if __name__ == "__main__":
     # Start the Async Event Loop
