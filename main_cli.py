@@ -89,7 +89,7 @@ async def main():
                 print("❌ Invalid amount. Please enter a numeric value.")
 
         elif choice == '2':
-            # --- [COMPLETE] View Analytics Logic ---
+            # --- View Analytics Logic ---
             print("\n--- Generating Analytics ---")
             
             # 1. Generate Charts
