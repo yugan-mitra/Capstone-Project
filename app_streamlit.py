@@ -3,6 +3,7 @@ import asyncio
 import pandas as pd
 import datetime
 import os
+import re
 
 # Import modules
 from src.database.csv_db import CsvExpenseRepository
@@ -87,30 +88,36 @@ with st.sidebar:
         new_cat_input = None
 
         if selected_cat == "➕ Add New Category":
-            new_cat_input = st.text_input("Enter with a New Category")
+            new_cat_input = st.text_input("Enter New Category Name")
         
         amount = st.number_input(
             "Amount (Rs.)", 
             min_value=0.0, 
             step=100.0, 
             value=None, 
-            placeholder="0.00"
+            placeholder="Type amount..."
         )
         
         submitted = st.form_submit_button("Save Expense")
         
         if submitted:
+            # 1. Check Amount
             if amount is None:
                 st.error("⚠️ Please enter an amount.")
                 st.stop() 
 
-            # Category Validation Logic
+            # 2. Check Category Logic
             if selected_cat == "➕ Add New Category":
-                if new_cat_input:
-                    final_category = new_cat_input.strip().title()
-                else:
+                if not new_cat_input:
                     st.error("⚠️ Please type a name for the new category.")
                     st.stop()
+                
+                # --- Input VALIDATION LOGIC ---
+                if not re.match(r"^[a-zA-Z\s]+$", new_cat_input):
+                    st.error("⛔ Invalid Name! Categories cannot contain numbers or special characters (@, $, !, etc). Only letters are allowed.")
+                    st.stop()
+                
+                final_category = new_cat_input.strip().title()
             
             # Save Process
             date = datetime.date.today().isoformat()
