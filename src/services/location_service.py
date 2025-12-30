@@ -4,7 +4,6 @@ import asyncio
 class LocationService:
     def __init__(self):
         # Default fallback
-        self.city = "Colombo"
         self.is_manual = False
 
     async def detect_location(self, session):
