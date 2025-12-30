@@ -1,6 +1,3 @@
-import aiohttp
-import asyncio
-
 class LocationService:
     def __init__(self):
         # Default fallback
