@@ -3,7 +3,7 @@ import aiohttp
 import datetime
 from functools import reduce
 
-# Import our custom modules
+# Import modules
 from src.database.csv_db import CsvExpenseRepository
 from src.services.api_client import ApiClient
 from src.analytics.charts import ExpenseVisualizer
@@ -49,7 +49,7 @@ async def main():
             current_city = await loc_service.detect_location(session)
         print(f"📍 Location found: {current_city}")
     except Exception as e:
-        current_city = "Colombo" # Fallback
+        current_city = "Colombo"
         print(f"⚠️ Location Detect Failed: {e}. Defaulting to Colombo.")
 
     # 3. Fetch Data based on location
@@ -76,7 +76,7 @@ async def main():
         choice = input("Select an option (1-4): ")
 
         if choice == '1':
-            # --- [COMPLETE] Add Expense Logic ---
+            # --- Add Expense Logic ---
             print("\n--- Add New Expense ---")
             category = input("Enter Category (e.g., Food, Travel): ")
             try:
@@ -110,7 +110,7 @@ async def main():
             # Refresh Weather for new location
             print("🔄 Updating Weather...")
             try:
-                # We reuse the API client to fetch data for the new city
+                # API client to fetch data for the new city
                 weather, _ = await api.get_daily_data(loc_service.city)
                 print(f"✅ Updated Weather: {weather}")
             except Exception as e:
