@@ -17,10 +17,12 @@ st.set_page_config(page_title="Productivity Dashboard", page_icon="🚀", layout
 # --- Initialize Services ---
 @st.cache_resource
 def get_services():
-    db = CsvExpenseRepository('data/expenses.csv')
+    csv = 'data/expenses.csv'
+    db = CsvExpenseRepository(csv)
     api = ApiClient()
+    viz = ExpenseVisualizer(csv)
     loc_service = LocationService()
-    viz = ExpenseVisualizer('data/expenses.csv')
+    
     return db, api, loc_service, viz
 
 db, api, loc_service, viz = get_services()
