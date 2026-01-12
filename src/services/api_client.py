@@ -1,7 +1,17 @@
-import aiohttp
+try:
+    import aiohttp  # type: ignore[reportMissingImports]
+except Exception:
+    aiohttp = None
+
 import asyncio
 import os
-from dotenv import load_dotenv
+
+try:
+    from dotenv import load_dotenv  # type: ignore[reportMissingImports]
+except Exception:
+    def load_dotenv(*args, **kwargs):
+        # no-op fallback if python-dotenv isn't installed
+        return False
 
 load_dotenv()
 
@@ -47,6 +57,9 @@ class ApiClient:
         """
         Orchestrator: Now needs the city to fetch weather.
         """
+        if aiohttp is None:
+            raise RuntimeError("aiohttp is not installed. Install it with 'pip install aiohttp'")
+
         async with aiohttp.ClientSession() as session:
             # Pass session and city to get_weather
             weather_task = asyncio.create_task(self.get_weather(session, city))
